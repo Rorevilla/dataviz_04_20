@@ -3,8 +3,7 @@ title: "Memonavirus"
 output: html_notebook
 ---
 
-```{r}
-
+```{r Setup}
 
 library(dplyr)
 library(magrittr)
@@ -15,11 +14,13 @@ library(hrbrthemes)
 
 Sys.setlocale("LC_ALL","English")
 
+```
+
+
+```{r Download and merge files}
 
 download.file(url = "https://github.com/dovedevic/memonavirus/archive/master.zip", destfile = "memonavirus-master.zip")
 unzip(zipfile = "memonavirus-master.zip")
-
-
 setwd(dir = "~/memonavirus-master/data/")
 
 # examine the contents
@@ -39,12 +40,32 @@ for (file in logs){
     }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
   }
 }
-
    
 colnames(dataset)<- c("id","id2","datetime","infected_user","infected_comment","cause_user","cause","cause_type")
 dataset <- dataset %>% mutate(fecha=as.POSIXct(datetime, format="%Y-%m-%d %H:%M:%S"))
 dataset<-dataset %>% group_by(infected_user) %>% filter(fecha==min(fecha)) %>% slice(1) %>% ungroup()
+
+```
+
+```{r Agregar Propiedades de los comentarios}
+
 dataset2<- dataset
+
+#Agregar id de Submission
+comment_post <- read.csv2("C:\Users\Revi\Documents\dataviz_04_20/Comment-Post/comments2_all.csv",sep=",",header=TRUE)
+dataset2 <- dataset2 %>% left_join(comment_post, by=c("infected_comment"))
+
+#Agregar id de parent comment
+comment_parent <- read.csv2("C:\Users\Revi\Documents\dataviz_04_20/Comment-Parent/comment_parents.csv",sep=",",header=TRUE)
+dataset2 <- dataset2 %>% left_join(comment_parent, by=c("infected_comment"))
+
+
+```
+
+```{r Graphs}
+
+#Cumulative cases over time
+
 dataset <- dataset%>% group_by(cause_type,hora=floor_date(fecha, "12 hours")) %>% arrange(cause_type,hora) %>%  summarise(infection_no=n()) %>% ungroup()
 dataset<-dataset %>% group_by(cause_type)%>% mutate(cumsum=cumsum(infection_no))
 
@@ -54,14 +75,15 @@ ggplot(dataset)+
   scale_y_continuous(labels = comma,breaks = seq(0,140000,20000))+
   theme_ipsum_rc()+
   labs(x="Date",y="Number of infected users",title="Spread of Memonavirus over Reddit")
-  
-
-
-comment_post <- read.csv2("C:/Users/Revi/Desktop/DataVizApril2020/Comment-Post/comments2_all.csv",sep=",",header=TRUE)
-dataset2 <- dataset2 %>% left_join(comment_post, by=c("infected_comment"))
-unique(comment_post$infected_comment) %>% data.frame() %>% write.csv2("comment_post.csv",row.names = FALSE)
-
 
 
 ```
+
+
+
+
+
+
+
+
 
