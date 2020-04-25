@@ -1,3 +1,11 @@
+---
+title: "Memonavirus"
+output: html_notebook
+---
+
+```{r}
+
+
 library(dplyr)
 library(magrittr)
 library(scales)
@@ -52,4 +60,8 @@ ggplot(dataset)+
 comment_post <- read.csv2("C:/Users/Revi/Desktop/DataVizApril2020/Comment-Post/comments2_all.csv",sep=",",header=TRUE)
 dataset2 <- dataset2 %>% left_join(comment_post, by=c("infected_comment"))
 unique(comment_post$infected_comment) %>% data.frame() %>% write.csv2("comment_post.csv",row.names = FALSE)
+
+
+
+```
 
