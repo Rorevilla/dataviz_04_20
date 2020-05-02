@@ -16,6 +16,7 @@ library(stringr)
 library(tidyverse)
 library(forcats)
 library(cowplot)
+library(pracma)
 
 use_python("C:/Users/Revi/AppData/Local/Programs/Python/Python38-32")
 
@@ -116,10 +117,18 @@ dataset2 <- dataset2 %>% left_join(parent_body, by=c("parent"="parent_id"))
 
 dataset3 <- dataset%>% group_by(cause_type,hora=floor_date(fecha, "12 hours")) %>% arrange(cause_type,hora) %>%  summarise(infection_no=n()) %>% ungroup() %>% group_by(cause_type)%>% mutate(cumsum=cumsum(infection_no))
 
+annotation = "On average, 4,560 users got infected per day"
+
+
 a<-ggplot(dataset3)+
+  geom_rect(xmin=as.POSIXct("2020-03-22 00:00:00"),xmax=as.POSIXct("2020-03-23 00:00:00"),ymin=0,ymax=130000,fill="grey90",alpha=0.01)+
+  geom_rect(xmin=as.POSIXct("2020-04-04 00:00:00"),xmax=as.POSIXct("2020-04-05 00:00:00"),ymin=0,ymax=130000,fill="grey90",alpha=0.01)+
+
   geom_line(data=dataset3 %>% filter(cause_type=="C"),aes(x=hora,y=cumsum),size=1.6,color="#e7593e")+
   geom_line(data=dataset3 %>% filter(cause_type=="S"),aes(x=hora,y=cumsum),size=1.6,color="#59bee4")+
   geom_line(data=dataset3 %>% group_by(hora) %>% summarise(cumsum=sum(cumsum)) %>% ungroup(),aes(x=hora,y=cumsum),size=2,color="#6b9565")+
+  geom_segment(data = trendline, aes(x=hora,y=cumsum,xend=hora1,yend=cumsum1),color="white",linetype=2)+
+  #geom_label(x=as.POSIXct("2020-04-09 06:00:00", format="%Y-%m-%d %H:%M:%S"),y=50000,label=annotation)+
   scale_x_datetime(breaks = seq(min(dataset3$hora),max(dataset3$hora)+ hours(3),by="7 days"), date_labels = "%b %d")+
   scale_y_continuous(labels = comma,breaks = seq(0,140000,20000))+
   theme_ipsum_rc()+
@@ -139,9 +148,10 @@ dataset4 <- todas_horas %>% left_join(dataset4,by=c("hora","cause_type")) %>% mu
 
 
 b<-ggplot(dataset4)+
-  geom_line(data=dataset4 %>% filter(cause_type=="C"),aes(x=hora,y=n),size=1.6,color="#e7593e")+
-  geom_line(data=dataset4 %>% filter(cause_type=="S"),aes(x=hora,y=n),size=1.6,color="#59bee4")+
-  geom_line(data=dataset4 %>% group_by(hora) %>% summarise(n=sum(n)) %>% ungroup(),aes(x=hora,y=n),size=2,color="#6b9565")+
+  geom_line(data=dataset4 %>% filter(cause_type=="C"),aes(x=hora,y=n),size=1.1,color="#e7593e")+
+  geom_line(data=dataset4 %>% filter(cause_type=="S"),aes(x=hora,y=n),size=1.1,color="#59bee4")+
+  geom_line(data=dataset4 %>% group_by(hora) %>% summarise(n=sum(n)) %>% ungroup(),aes(x=hora,y=n),size=1.5,color="#6b9565")+
+  geom_hline(yintercept =  dataset4 %>% group_by(hora) %>% summarise(n=sum(n)) %$% mean(n),,color="white",linetype=2,size=0.6)+
   scale_x_datetime(breaks = seq(min(dataset4$hora),max(dataset4$hora)+ hours(5),by="7 days"), date_labels = "%b %d")+
   theme_ipsum_rc()+
   labs(x="Date",y="Number of infected users",title="Infections per hour")+
@@ -202,7 +212,7 @@ axis.title.y = element_text(color="white", face="bold"),axis.text.x = element_te
 
 
 
-f<-wordcloud(dataset2$parent_content,max.words=50,)
+f<-wordcloud(dataset2$parent_content,max.words=50)
 
 
 
@@ -213,6 +223,29 @@ ggsave("plot.svg",width = 25,height = 15)
 
 ```
 
+```{r Calculations}
+
+
+
+trendline1 = dataset3 %>% group_by(hora) %>% summarise(cumsum=sum(cumsum)) %>% filter(hora==min(hora))
+trendline2 = dataset3 %>% group_by(hora) %>% summarise(cumsum=sum(cumsum)) %>% filter(hora==max(hora))
+trendline = bind_cols(trendline1,trendline2)
+difftime(max(dataset$datetime),min(dataset$datetime),units="days")
+#4560 personas al dia
+
+dataset %>% group_by(cause_type) %>% summarise(porcentaje = n()) %>% mutate(porcentaje=porcentaje*100/sum(porcentaje))
+
+#Max/Min inf por hora
+dataset4 %>% group_by(hora) %>%summarise(n=sum(n)) %>% ungroup() %>% filter(n==min(n))
+dataset4 %>% group_by(hora) %>%summarise(n=sum(n)) %>% ungroup() %>% filter(n==max(n))
+
+
+
+#Max / Min por dia
+dataset3 %>% mutate(hora=floor_date(hora,"1 day")) %>% group_by(hora) %>% summarise(n=sum(infection_no)) %>% ungroup() %>% top_n(-2,n)
+dataset3 %>% mutate(hora=floor_date(hora,"1 day")) %>% group_by(hora) %>% summarise(n=sum(infection_no)) %>% ungroup() %>% top_n(1,n)
+
+```
 
 
 
