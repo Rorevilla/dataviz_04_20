@@ -10,7 +10,7 @@
    viewBox="0 0 2000 1200"
    version="1.1"
    id="svg2591"
-   sodipodi:docname="plot_edit.svg"
+   sodipodi:docname="memonavirus_stats.svg"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
    width="2000"
    height="1200">
@@ -39,13 +39,13 @@
      inkscape:window-height="1027"
      id="namedview2593"
      showgrid="false"
-     inkscape:zoom="0.57236365"
-     inkscape:cx="688.25871"
-     inkscape:cy="455.31431"
+     inkscape:zoom="0.80944444"
+     inkscape:cx="1280.6593"
+     inkscape:cy="186.02196"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg2591"
+     inkscape:current-layer="g4254"
      inkscape:snap-page="true"
      inkscape:snap-intersection-paths="true"
      inkscape:object-paths="true"
@@ -8797,37 +8797,33 @@
        inkscape:connector-curvature="0" />
   </g>
   <g
-     id="g3911"
-     transform="translate(-1.3828125e-4)">
-    <g
-       clip-path="url(#cpMHwxODAwfDEwODB8MA==)"
-       id="g29621"
-       transform="translate(1396.165,64.26663)">
-      <text
-         transform="matrix(1.1603504,0,0,1,-14.20471,0)"
-         x="87.830002"
-         y="582.67999"
-         style="font-weight:bold;font-size:18px;font-family:'Roboto Condensed';fill:#ffffff;stroke-width:0.96919835"
-         textLength="272.04999"
-         lengthAdjust="spacingAndGlyphs"
-         id="text29619">50 Most frequent words in infectious comments</text>
-    </g>
+     transform="translate(1396.1649,64.26663)"
+     id="g29621"
+     clip-path="url(#cpMHwxODAwfDEwODB8MA==)">
     <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.33333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
-       x="1484.0195"
-       y="677.41833"
-       id="text3028"><tspan
-         sodipodi:role="line"
-         x="1484.0195"
-         y="677.41833"
-         id="tspan3026">Considers text of the parents of all infected comments</tspan></text>
-    <path
-       inkscape:connector-curvature="0"
-       id="path3892"
-       d="M 1484.6559,657.14375 H 1855.739"
-       style="opacity:0.7;fill:#59bee4;fill-opacity:1;stroke:#ffffff;stroke-width:1.8499999;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:12.03999996;stroke-opacity:1" />
+       id="text29619"
+       lengthAdjust="spacingAndGlyphs"
+       textLength="272.04999"
+       style="font-weight:bold;font-size:18px;font-family:'Roboto Condensed';fill:#ffffff;stroke-width:0.96919835"
+       y="582.67999"
+       x="87.830002"
+       transform="matrix(1.1603504,0,0,1,-14.20471,0)">50 Most frequent words in infectious comments</text>
   </g>
+  <text
+     id="text3028"
+     y="677.41833"
+     x="1484.0194"
+     style="font-style:normal;font-weight:normal;font-size:11.33333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+     xml:space="preserve"><tspan
+       id="tspan3026"
+       y="677.41833"
+       x="1484.0194"
+       sodipodi:role="line">Considers text of the parents of all infected comments</tspan></text>
+  <path
+     style="opacity:0.7;fill:#59bee4;fill-opacity:1;stroke:#ffffff;stroke-width:1.8499999;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:12.03999996;stroke-opacity:1"
+     d="m 1484.6558,657.14375 h 371.0831"
+     id="path3892"
+     inkscape:connector-curvature="0" />
   <g
      id="g3919"
      transform="translate(1.4463107)">
@@ -9007,4 +9003,47 @@
        x="937.57825"
        y="1151.4756"
        style="letter-spacing:-0.52999998px;fill:#ffffff;" /></text>
+  <g
+     clip-path="url(#cpMHwxODAwfDEwODB8MA==)"
+     id="g4254"
+     transform="translate(1516.7177,665.78885)">
+    <text
+       transform="matrix(0.44279781,0,0,0.69604613,263.52122,159.9009)"
+       x="87.830002"
+       y="582.67999"
+       style="font-weight:bold;font-size:18px;font-family:'Roboto Condensed';fill:#ffffff;stroke-width:0.96919835"
+       textLength="272.04999"
+       lengthAdjust="spacingAndGlyphs"
+       id="text4252">github.com/Rorevilla</text>
+    <text
+       id="text4258"
+       lengthAdjust="spacingAndGlyphs"
+       textLength="272.04999"
+       style="font-weight:bold;font-size:18px;font-family:'Roboto Condensed';fill:#ffffff;stroke-width:0.96919835"
+       y="582.67999"
+       x="87.830002"
+       transform="matrix(0.44279781,0,0,0.69604613,262.64765,175.62517)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:12px;line-height:1.25;font-family:sans-serif;letter-spacing:-0.40000001px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.42967945"
+       x="1.1346931"
+       y="521.61517"
+       id="text4262"><tspan
+         sodipodi:role="line"
+         id="tspan4260"
+         x="1.1346931"
+         y="521.61517"
+         style="font-size:12px;letter-spacing:-0.40000001px;fill:#ffffff;stroke-width:0.42967945">Data obtained from github.com/dovedevic/memonavirus &amp; Reddit.com using PRAW</tspan></text>
+    <text
+       id="text4266"
+       y="503.61517"
+       x="330.32349"
+       style="font-style:normal;font-weight:normal;font-size:12px;line-height:1.25;font-family:sans-serif;letter-spacing:-0.40000001px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.42967945"
+       xml:space="preserve"><tspan
+         style="font-size:14.66666698px;letter-spacing:-0.40000001px;fill:#ffffff;stroke-width:0.42967945"
+         y="503.61517"
+         x="330.32349"
+         id="tspan4264"
+         sodipodi:role="line">github.com/Rorevilla</tspan></text>
+  </g>
 </svg>
