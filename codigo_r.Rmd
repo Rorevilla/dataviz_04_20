@@ -3,7 +3,7 @@ title: "Memonavirus"
 output: html_notebook
 ---
 
-```{r Setup}
+```{r setup, include=FALSE}
 
 library(dplyr)
 library(magrittr)
@@ -11,18 +11,29 @@ library(scales)
 library(lubridate)
 library(ggplot2)
 library(hrbrthemes)
+library(reticulate)
+library(stringr)
+library(tidyverse)
+library(forcats)
+library(cowplot)
+
+use_python("C:/Users/Revi/AppData/Local/Programs/Python/Python38-32")
 
 Sys.setlocale("LC_ALL","English")
+Sys.setenv("LANGUAGE"="En")
 
 ```
 
 
-```{r Download and merge files}
+```{r Download files}
 
 download.file(url = "https://github.com/dovedevic/memonavirus/archive/master.zip", destfile = "memonavirus-master.zip")
 unzip(zipfile = "memonavirus-master.zip")
 setwd(dir = "~/memonavirus-master/data/")
+```
 
+
+```{r Merge files}
 # examine the contents
 logs<-list.files("~/memonavirus-master/data/raw",pattern="*infections*",full.names = TRUE)
 
@@ -45,6 +56,31 @@ colnames(dataset)<- c("id","id2","datetime","infected_user","infected_comment","
 dataset <- dataset %>% mutate(fecha=as.POSIXct(datetime, format="%Y-%m-%d %H:%M:%S"))
 dataset<-dataset %>% group_by(infected_user) %>% filter(fecha==min(fecha)) %>% slice(1) %>% ungroup()
 
+
+
+
+
+```
+
+```{python Get parent comment content}
+
+import praw
+import numpy as np
+import pandas as pd
+import datetime
+
+reddit = praw.Reddit(client_id = 'iPPassd4RHMKPw',client_secret = 'l51VI4BMR0E92DnBrh5FCCjrb6w',
+                    username = 'Curious_E_T',password = '34857016',user_agent = 'Memonavirus')
+                    
+def get_content(comment):
+    current = reddit.comment(id=comment)
+    content = current.body
+    return content
+  
+
+comments["parent"] = comments.infected_comment.apply(get_parent)
+            
+                    
 ```
 
 ```{r Agregar Propiedades de los comentarios}
@@ -52,12 +88,24 @@ dataset<-dataset %>% group_by(infected_user) %>% filter(fecha==min(fecha)) %>% s
 dataset2<- dataset
 
 #Agregar id de Submission
-comment_post <- read.csv2("C:\Users\Revi\Documents\dataviz_04_20/Comment-Post/comments2_all.csv",sep=",",header=TRUE)
+comment_post <- read.csv2("C:/Users/Revi/Documents/dataviz_04_20/Comment-Post/comments2_all.csv",sep=",",header=TRUE) %>% select(-X)
 dataset2 <- dataset2 %>% left_join(comment_post, by=c("infected_comment"))
 
 #Agregar id de parent comment
-comment_parent <- read.csv2("C:\Users\Revi\Documents\dataviz_04_20/Comment-Parent/comment_parents.csv",sep=",",header=TRUE)
+comment_parent <- read.csv2("C:/Users/Revi/Documents/dataviz_04_20/Comment-Parent/comment_parents.csv",sep=",",header=TRUE)%>% select(-X)
 dataset2 <- dataset2 %>% left_join(comment_parent, by=c("infected_comment"))
+
+
+#Agregar body de parent comment
+parent_body <- read.csv2("C:/Users/Revi/Documents/dataviz_04_20/Parent-Body/parent_bodies.csv",sep=",",header=TRUE)%>% select(-X,parent_id=parent_id,parent_content=contend)
+parent_body <- parent_body %>%  filter(!grepl("t3_",parent_id))
+parent_body <- parent_body %>%  mutate(parent_id = paste("t1_",parent_id,sep=""))
+dataset2 <- dataset2 %>% left_join(parent_body, by=c("parent"="parent_id"))
+
+
+
+#dataset2$parent %>% data.frame() %>% select(parent_id='.') %>% filter(grepl("t1",parent_id)) %>% mutate(parent_id=str_replace(parent_id,"t1_","")) %>% unique()%>% write.csv2("parents.csv",row.names = FALSE)
+
 
 
 ```
@@ -66,19 +114,104 @@ dataset2 <- dataset2 %>% left_join(comment_parent, by=c("infected_comment"))
 
 #Cumulative cases over time
 
-dataset <- dataset%>% group_by(cause_type,hora=floor_date(fecha, "12 hours")) %>% arrange(cause_type,hora) %>%  summarise(infection_no=n()) %>% ungroup()
-dataset<-dataset %>% group_by(cause_type)%>% mutate(cumsum=cumsum(infection_no))
+dataset3 <- dataset%>% group_by(cause_type,hora=floor_date(fecha, "12 hours")) %>% arrange(cause_type,hora) %>%  summarise(infection_no=n()) %>% ungroup() %>% group_by(cause_type)%>% mutate(cumsum=cumsum(infection_no))
 
-ggplot(dataset)+
-  geom_line(aes(x=hora,y=cumsum,color=cause_type),size=1)+
-  scale_x_datetime(breaks = seq(min(dataset$hora),max(dataset$hora)+ hours(3),by="7 days"), date_labels = "%b %d")+
+a<-ggplot(dataset3)+
+  geom_line(data=dataset3 %>% filter(cause_type=="C"),aes(x=hora,y=cumsum),size=1.6,color="#e7593e")+
+  geom_line(data=dataset3 %>% filter(cause_type=="S"),aes(x=hora,y=cumsum),size=1.6,color="#59bee4")+
+  geom_line(data=dataset3 %>% group_by(hora) %>% summarise(cumsum=sum(cumsum)) %>% ungroup(),aes(x=hora,y=cumsum),size=2,color="#6b9565")+
+  scale_x_datetime(breaks = seq(min(dataset3$hora),max(dataset3$hora)+ hours(3),by="7 days"), date_labels = "%b %d")+
   scale_y_continuous(labels = comma,breaks = seq(0,140000,20000))+
   theme_ipsum_rc()+
-  labs(x="Date",y="Number of infected users",title="Spread of Memonavirus over Reddit")
+  labs(x="Date",y="Number of infected users",title="Cumulative Infections")+
+  theme(plot.background = element_rect(fill = "#4b4744"))+
+  theme(plot.title = element_text(color="white",face="bold"),axis.title.x = element_text(color="white",face="bold"),
+axis.title.y = element_text(color="white", face="bold"),axis.text.x = element_text(color="white"),axis.text.y = element_text(color="white")
+)
+
+
+
+
+#Infections per Hour
+todas_horas <- bind_rows(seq(min(floor_date(dataset$fecha,"1 hour")),max(floor_date(dataset$fecha,"1 hour")),by="1 hour") %>% data.frame() %>% select(hora='.') %>% mutate(cause_type="S"),seq(min(floor_date(dataset$fecha,"1 hour")),max(floor_date(dataset$fecha,"1 hour")),by="1 hour") %>% data.frame() %>% select(hora='.') %>% mutate(cause_type="C"))
+dataset4 <- dataset %>% group_by(cause_type,hora=floor_date(fecha, "1 hour")) %>% summarise(n=n()) %>% ungroup()
+dataset4 <- todas_horas %>% left_join(dataset4,by=c("hora","cause_type")) %>% mutate(n=ifelse(is.na(n),0,n))
+
+
+b<-ggplot(dataset4)+
+  geom_line(data=dataset4 %>% filter(cause_type=="C"),aes(x=hora,y=n),size=1.6,color="#e7593e")+
+  geom_line(data=dataset4 %>% filter(cause_type=="S"),aes(x=hora,y=n),size=1.6,color="#59bee4")+
+  geom_line(data=dataset4 %>% group_by(hora) %>% summarise(n=sum(n)) %>% ungroup(),aes(x=hora,y=n),size=2,color="#6b9565")+
+  scale_x_datetime(breaks = seq(min(dataset4$hora),max(dataset4$hora)+ hours(5),by="7 days"), date_labels = "%b %d")+
+  theme_ipsum_rc()+
+  labs(x="Date",y="Number of infected users",title="Infections per hour")+
+  theme(plot.background = element_rect(fill = "#4b4744"))+
+  theme(plot.title = element_text(color="white",face="bold"),axis.title.x = element_text(color="white",face="bold"),
+axis.title.y = element_text(color="white", face="bold"),axis.text.x = element_text(color="white"),axis.text.y = element_text(color="white")
+)
+
+
+# Post with the most infections
+
+
+c<-ggplot(dataset2 %>% group_by(post) %>% summarise(n=n()) %>% top_n(10) %>% ungroup() %>% mutate(post=fct_reorder(post,n)))+
+  geom_bar(aes(x=post,y=n),stat = "identity",fill="#e7593e")+
+  coord_flip()+
+  geom_label(aes(label=n,x=post,y=n))+
+  theme_ipsum_rc()+
+  labs(y="Number of infections",x="Post",title="Top 10 posts with the most infections")+
+  theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+
+  theme(plot.background = element_rect(fill = "#4b4744"))+
+  theme(plot.title = element_text(color="white",face="bold"),axis.title.x = element_text(color="white",face="bold"),
+axis.title.y = element_text(color="white", face="bold"),axis.text.x = element_text(color="white"))
+
+
+
+# Parent with the most direct infections
+dataset5 <- dataset2 %>% group_by(parent) %>% summarise(n=n()) %>% top_n(10) %>% ungroup()
+dataset5 <- dataset5 %>% left_join(dataset2 %>% select(parent,parent_content),by="parent") %>% unique()
+
+d<-ggplot(dataset5 %>% mutate(parent=fct_reorder(parent,n)) )+
+  geom_bar(aes(x=parent,y=n),stat = "identity",fill="#59bee4")+
+  coord_flip()+
+  geom_label(aes(label=n,x=parent,y=n))+
+  geom_text(aes(label=parent,x=parent),y=25,color="white")+
+  theme_ipsum_rc()+
+  labs(y="Number of infections",x="Comment",title="Top 10 comments with the most direct infections")+
+  theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+
+  theme(plot.background = element_rect(fill = "#4b4744"))+
+  theme(plot.title = element_text(color="white",face="bold"),axis.title.x = element_text(color="white",face="bold"),
+axis.title.y = element_text(color="white", face="bold"),axis.text.x = element_text(color="white"))
+
+
+# User with the most infections
+
+e<-ggplot(dataset2 %>% group_by(cause_user) %>% summarise(n=n()) %>% top_n(10) %>% ungroup() %>% mutate(cause_user=fct_reorder(cause_user,n)))+
+  geom_bar(aes(x=cause_user,y=n),stat = "identity",fill="#6b9565")+
+  coord_flip()+
+  geom_label(aes(label=n,x=cause_user,y=n))+
+  geom_text(aes(label=cause_user,x=cause_user),y=35,color="white")+
+  theme_ipsum_rc()+
+  labs(y="Number of infections",x="User",title="Top 10 users who infected the most users")+
+  theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+
+  theme(plot.background = element_rect(fill = "#4b4744"))+
+  theme(plot.title = element_text(color="white",face="bold"),axis.title.x = element_text(color="white",face="bold"),
+axis.title.y = element_text(color="white", face="bold"),axis.text.x = element_text(color="white"))
+
+# Word cloud (parent comment)
+
+
+
+f<-wordcloud(dataset2$parent_content,max.words=50,)
+
+
+
+(a|b)/(c|d|e|plot_spacer())
+
+ggsave("plot.svg",width = 25,height = 15)
 
 
 ```
-
 
 
 
